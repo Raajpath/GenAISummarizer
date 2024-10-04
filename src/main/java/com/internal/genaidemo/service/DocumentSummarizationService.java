@@ -1,10 +1,10 @@
 package com.internal.genaidemo.service;
 
+import com.google.cloud.aiplatform.v1.EndpointName;
+import com.google.cloud.aiplatform.v1.PredictRequest;
+import com.google.cloud.aiplatform.v1.PredictResponse;
+import com.google.cloud.aiplatform.v1.PredictionServiceClient;
 import com.google.cloud.documentai.v1.*;
-
-import com.google.cloud.aiplatform.v1.*;
-
-
 import com.google.cloud.vertexai.VertexAI;
 import com.google.cloud.vertexai.generativeai.ContentMaker;
 import com.google.cloud.vertexai.generativeai.GenerativeModel;
@@ -26,11 +26,17 @@ import java.util.Map;
 @Service
 public class DocumentSummarizationService {
 
-    private static final String PROJECT_ID = "sep-rjha-08dec-cts";
-    private static final String LOCATION = "us-central1"; // e.g., "us-central1"
-    private static final String PROCESSOR_ID = "7381f3650fe0af1";
-    private static final String VERTEX_AI_ENDPOINT = "https://us-documentai.googleapis.com/v1/projects/534738955739/locations/us/processors/7381f3650fe0af1:process";
+    @org.springframework.beans.factory.annotation.Value("${google.project-id}")
+    private String PROJECT_ID;
 
+    @org.springframework.beans.factory.annotation.Value("${vertex-ai.location}")
+    private String LOCATION;    // e.g., "us-central1"
+
+    @org.springframework.beans.factory.annotation.Value("${document-ai.processor-id}")
+    private String PROCESSOR_ID;
+
+    @org.springframework.beans.factory.annotation.Value("${vertex-ai.endpoint}")
+    private String VERTEX_AI_ENDPOINT;
 
     // Method to summarize the document
     public String summarizeDocument(MultipartFile file) throws IOException {
@@ -115,7 +121,7 @@ public class DocumentSummarizationService {
     }
 
     private String summarizePdf(String pdfFilePath) throws IOException {
-        try (VertexAI vertexAI = new VertexAI("sep-rjha-08dec-cts", "us-central1")) {
+        try (VertexAI vertexAI = new VertexAI(PROJECT_ID, LOCATION)) {
 
             byte[] pdfData= Files.readAllBytes(Path.of(pdfFilePath));
             GenerativeModel model = new GenerativeModel("gemini-1.5-flash-001", vertexAI);
